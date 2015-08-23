@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 import cherrypy
+import pymongo
+import random
 
+
+client = pymongo.MongoClient('mongo', 27017)
+db = client["TTR"]
 
 class Token:
     """
     Manages token authentication
     """
     def __init__(self):
-        pass  # TODO load resources
+        with open("./res/dict.txt") as wordlist:
+            self.words = wordlist.readlines()
 
+    @cherrypy.expose
     def index(self):
-        return "OK"
-    index.exposed = True
+        idx = ' '.join(random.sample(self.words, 2))
+        return idx
 
 
 class Game:
@@ -33,7 +40,7 @@ class Game:
         pass
 
 if __name__ == '__main__':
-
+    cherrypy.server.socket_host = "0.0.0.0"
     cherrypy.tree.mount(
         Game(), '/game',
         {'/':

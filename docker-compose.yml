@@ -1,0 +1,11 @@
+echo:
+    build: server
+    ports: 
+        - "8080:8080"
+    links:
+        - mongo
+    volumes:
+        - ./server:/srv/www/
+
+mongo:
+    image: mongo
