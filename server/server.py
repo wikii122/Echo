@@ -6,8 +6,10 @@ import random
 import json
 
 
+# Assume docker links from docker compose
 client = pymongo.MongoClient('mongo', 27017)
-db = client["TTR"]
+db = client["echo"]
+db.data.create_index("time", expireAfterSeconds=60*60*24)
 
 class Token:
     """
@@ -34,7 +36,7 @@ class Game:
         if id is None:
             raise cherrypy.HTTPError(404)
 
-        collection = db["games"]
+        collection = db["data"]
         json = collection.find_one({"token": id})
         if json is None:
             raise cherrypy.HTTPError(404)
@@ -54,7 +56,7 @@ class Game:
                 "time": datetime.datetime.now(),
                 "token": id
         }
-        collection = db["games"]
+        collection = db["data"]
         if collection.find({"token": id}).count() != 0:
             raise cherrypy.HTTPError(409)
 
@@ -72,7 +74,7 @@ class Game:
         cl = cherrypy.request.headers['Content-Length']
         rawbody = cherrypy.request.body.read(int(cl))
         body = json.loads(rawbody.decode("utf-8"))
-        collection = db["games"]
+        collection = db["data"]
         collection.update_one({"token": id}, {"$set": {"data": body, "time": datetime.datetime.now()}})
 
         return {

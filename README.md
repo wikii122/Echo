@@ -1,6 +1,6 @@
 #Echo
 
-Simple echoserver, used to keep data under unique token for short time.
+Simple key-value store, used to keep data under unique token for short time.
 
 ## Protocol
 
