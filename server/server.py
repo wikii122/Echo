@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import cherrypy
+import datetime
 import pymongo
 import random
+import json
 
 
 client = pymongo.MongoClient('mongo', 27017)
@@ -27,14 +29,57 @@ class Game:
     """
     exposed = True
 
+    @cherrypy.tools.json_out()
     def GET(self, id=None):
-        pass
+        if id is None:
+            raise cherrypy.HTTPError(404)
 
+        collection = db["games"]
+        json = collection.find_one({"token": id})
+        if json is None:
+            raise cherrypy.HTTPError(404)
+        return json["data"]
+
+
+    @cherrypy.tools.json_out()
     def POST(self, id=None):
-        pass
+        if id is None:
+            raise cherrypy.HTTPError(404)
 
+        cl = cherrypy.request.headers['Content-Length']
+        rawbody = cherrypy.request.body.read(int(cl))
+        body = json.loads(rawbody.decode("utf-8"))
+        d = {
+                "data": body,
+                "time": datetime.datetime.now(),
+                "token": id
+        }
+        collection = db["games"]
+        if collection.find({"token": id}).count() != 0:
+            raise cherrypy.HTTPError(409)
+
+        collection.insert_one(d)
+
+        return {
+            "token": id,
+            "status": "ok"
+        }
+
+    @cherrypy.tools.json_out()
     def PUT(self, id=None):
-        pass
+        if id is None:
+            raise cherrypy.HTTPError(404)
+        cl = cherrypy.request.headers['Content-Length']
+        rawbody = cherrypy.request.body.read(int(cl))
+        body = json.loads(rawbody.decode("utf-8"))
+        collection = db["games"]
+        collection.update_one({"token": id}, {"$set": {"data": body, "time": datetime.datetime.now()}})
+
+        return {
+            "token": id,
+            "status": "ok"
+        }
+
 
     def DELETE(self, id=None):
         pass
@@ -42,7 +87,7 @@ class Game:
 if __name__ == '__main__':
     cherrypy.server.socket_host = "0.0.0.0"
     cherrypy.tree.mount(
-        Game(), '/game',
+        Game(), '/data',
         {'/':
             {'request.dispatch': cherrypy.dispatch.MethodDispatcher()}
         }

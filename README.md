@@ -1,14 +1,14 @@
 #Echo
 
-Simple echoserver, designed for TTR app.
+Simple echoserver, used to keep data under unique token for short time.
 
 ## Protocol
 
-- GET `/new` - generates free game ID.
-- POST `/game/<id>` - creates entry for new game, with parameters.
-- PUT `/game/<id>` - updates game state.
-- DELETE `/game/<id>` - removes game from server.
+- GET `/new` - generates free data ID.
+- POST `/data/<id>` - creates entry for new data, with parameters.
+- PUT `/data/<id>` - updates data state.
+- DELETE `/data/<id>` - removes data from server.
 
-Game should delete itself after 24 hours of inactivity.
+Data should delete itself after 24 hours of inactivity.
 
 
