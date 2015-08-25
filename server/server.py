@@ -64,7 +64,7 @@ class Game:
 
         return {
             "token": id,
-            "status": "ok"
+            "status": "created"
         }
 
     @cherrypy.tools.json_out()
@@ -75,16 +75,29 @@ class Game:
         rawbody = cherrypy.request.body.read(int(cl))
         body = json.loads(rawbody.decode("utf-8"))
         collection = db["data"]
+        if collection.find({"token": id}).count() == 0:
+            raise cherrypy.HTTPError(404)
         collection.update_one({"token": id}, {"$set": {"data": body, "time": datetime.datetime.now()}})
 
         return {
             "token": id,
-            "status": "ok"
+            "status": "updated"
         }
 
 
+    @cherrypy.tools.json_out()
     def DELETE(self, id=None):
-        pass
+        if id is None:
+            raise cherrypy.HTTPError(404)
+        collection = db["data"]
+        if collection.find({"token": id}).count() == 0:
+            raise cherrypy.HTTPError(404)
+        collection.remove({"token": id})
+        return {
+            "token": id,
+            "status": "removed"
+        }
+
 
 if __name__ == '__main__':
     cherrypy.server.socket_host = "0.0.0.0"
