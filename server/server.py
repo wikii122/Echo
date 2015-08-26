@@ -21,8 +21,18 @@ class Token:
 
     @cherrypy.expose
     def index(self):
-        idx = ' '.join(random.sample(self.words, 2))
+        return self.create_index()
+
+    def create_index(self, words=2, i=0):
+        idx = ' '.join(random.sample(self.words, words))
+        collection = db["data"]
+        if collection.find({"token": idx}).count() != 0:
+            if i < 20:
+                return self.create_index(words, i+1)
+            else:
+                return self.create_index(words+1)
         return idx
+
 
 
 class Game:
