@@ -17,11 +17,12 @@ class Token:
     """
     def __init__(self):
         with open("./res/dict.txt") as wordlist:
-            self.words = wordlist.readlines()
+            self.words = [word.strip() for word in wordlist.readlines()]
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def index(self):
-        return self.create_index()
+        return {"token": self.create_index()}
 
     def create_index(self, words=2, i=0):
         idx = ' '.join(random.sample(self.words, words))
